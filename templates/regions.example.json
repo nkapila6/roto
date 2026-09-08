@@ -1,0 +1,333 @@
+{
+  "_note": "Phase 2 + 3 config. Rect is [x0, y0, x1, y1]. Any rect component may be a short expression over this frame's tracked values: min/max/abs/round/int/float, + - * / // %, parentheses, and subscripts like heading[1]. Trackers run on the original frame before any clearing, so a clear rect may reference a tracker declared in the same band; add \"requires\" when that tracker can come back null. Bands must cover every frame - see the coverage audit. This example is the ChatGPT adaptation from references/case-study-astra.md, extended to full coverage; replace the bands with your own.",
+  "source": "reference/original.mp4",
+  "frames": 180,
+  "output": "assets/plates",
+  "tracksOutput": "assets/tracks.js",
+  "tracksVar": "referenceTracks",
+  "global": {
+    "_note": "Applied to every frame, after the band clears. The original corner identity must go; the background there is locally uniform, so an equivalent block from 90px lower reads as clean and keeps the faint grid.",
+    "clear": [
+      {
+        "strategy": "patch-copy",
+        "rect": [
+          20,
+          18,
+          310,
+          104
+        ],
+        "from": [
+          20,
+          108
+        ]
+      }
+    ]
+  },
+  "bands": [
+    {
+      "name": "title",
+      "_note": "Big title over a moving 2D gradient. Only cubic-hermite survives here - linear-blend leaves a visible horizontal band across the curvature.",
+      "start": 0,
+      "end": 22,
+      "clear": [
+        {
+          "strategy": "cubic-hermite",
+          "rect": [
+            300,
+            418,
+            1600,
+            692
+          ],
+          "reach": 30
+        }
+      ]
+    },
+    {
+      "name": "title-build",
+      "_note": "Flat #0866F5 field; row 420 is clean blue on every frame of the band, so one scanline is exact. The upstream project clears nothing here and draws nothing over it, so its render shows the reference's own title for 23 frames - about a second. This band exists to close that gap.",
+      "start": 22,
+      "end": 45,
+      "clear": [
+        {
+          "strategy": "row-copy",
+          "rect": [
+            340,
+            440,
+            1660,
+            665
+          ],
+          "sourceRow": 420
+        }
+      ]
+    },
+    {
+      "name": "prompt",
+      "_note": "Input panel zooming and drifting right. The panel's left border is the darkest pixel on row 570, so it can be located per frame; scale and heading baseline have no edge to lock onto and are keyframed from measurements at the band ends.",
+      "start": 45,
+      "end": 72,
+      "track": [
+        {
+          "name": "promptLeft",
+          "type": "dark-column",
+          "row": 570,
+          "search": [
+            200,
+            1000
+          ]
+        },
+        {
+          "name": "promptScale",
+          "type": "keyframe",
+          "frames": [
+            45,
+            50,
+            53,
+            60,
+            66,
+            71
+          ],
+          "values": [
+            0.72,
+            0.8,
+            0.91,
+            1.0,
+            1.02,
+            1.025
+          ],
+          "round": false
+        },
+        {
+          "name": "headingY",
+          "type": "keyframe",
+          "frames": [
+            45,
+            50,
+            53,
+            60,
+            66,
+            71
+          ],
+          "values": [
+            473,
+            470,
+            462,
+            453,
+            451,
+            451
+          ],
+          "round": false
+        },
+        {
+          "name": "bodyTop",
+          "type": "keyframe",
+          "frames": [
+            45,
+            49,
+            50,
+            71
+          ],
+          "values": [
+            498,
+            498,
+            505,
+            505
+          ]
+        }
+      ],
+      "clear": [
+        {
+          "strategy": "row-copy",
+          "rect": [
+            "max(250, promptLeft + 70)",
+            392,
+            1920,
+            478
+          ],
+          "sourceRow": 385
+        },
+        {
+          "strategy": "row-copy",
+          "rect": [
+            "promptLeft + 30",
+            "bodyTop",
+            "min(1919, promptLeft + 1200)",
+            582
+          ],
+          "sourceRow": 583
+        }
+      ]
+    },
+    {
+      "name": "typing",
+      "_note": "Close-up on the input. The border is blue rather than dark at this scale, so a brightness minimum finds the text instead - track the blue-minus-red separation. The heading above the input is the second gap upstream leaves open: it drifts with the zoom and runs off the right edge, so track it rather than fixing a rect.",
+      "start": 72,
+      "end": 107,
+      "track": [
+        {
+          "name": "left",
+          "type": "colored-column",
+          "row": 555,
+          "search": [
+            300,
+            1000
+          ],
+          "channels": [
+            0,
+            2
+          ]
+        },
+        {
+          "name": "heading2",
+          "type": "bbox",
+          "rect": [
+            980,
+            266,
+            1920,
+            356
+          ],
+          "limit": 150
+        }
+      ],
+      "clear": [
+        {
+          "strategy": "linear-blend",
+          "rect": [
+            "left + 65",
+            442,
+            1919,
+            545
+          ]
+        },
+        {
+          "strategy": "linear-blend",
+          "rect": [
+            "heading2[0] - 30",
+            262,
+            1920,
+            366
+          ],
+          "requires": "heading2"
+        }
+      ]
+    },
+    {
+      "name": "send",
+      "_note": "Cursor travels to the send button while the tail of the typed line stays on screen - the third gap upstream leaves open. Stop the clear short of x=1100: the cursor and button live to its right and are motion worth keeping.",
+      "start": 107,
+      "end": 134,
+      "track": [
+        {
+          "name": "tail",
+          "type": "bbox",
+          "rect": [
+            0,
+            380,
+            1100,
+            660
+          ],
+          "limit": 140
+        }
+      ],
+      "clear": [
+        {
+          "strategy": "linear-blend",
+          "rect": [
+            0,
+            "tail[1] - 14",
+            "min(1100, tail[2] + 40)",
+            "tail[3] + 14"
+          ],
+          "requires": "tail"
+        }
+      ]
+    },
+    {
+      "name": "results",
+      "_note": "Results card settles upward. top-edge finds where the white card begins in column 1850; offset -125 turns that into a delta from the resting position, which is what the draw loop wants. bbox reports the original heading's bounds so replacement copy can sit on the same baseline.",
+      "start": 134,
+      "end": 161,
+      "track": [
+        {
+          "name": "resultOffset",
+          "type": "top-edge",
+          "column": 1850,
+          "search": [
+            80,
+            350
+          ],
+          "threshold": 249,
+          "above": true,
+          "offset": -125,
+          "fallback": 125
+        },
+        {
+          "name": "heading",
+          "type": "bbox",
+          "rect": [
+            455,
+            "resultOffset + 160",
+            1200,
+            "resultOffset + 243"
+          ],
+          "limit": 225
+        }
+      ],
+      "clear": [
+        {
+          "strategy": "linear-blend",
+          "rect": [
+            470,
+            "heading[1] - 16",
+            1240,
+            "heading[3] + 16"
+          ],
+          "requires": "heading"
+        },
+        {
+          "strategy": "linear-blend",
+          "rect": [
+            785,
+            "resultOffset + 330",
+            1770,
+            "resultOffset + 452"
+          ]
+        },
+        {
+          "strategy": "linear-blend",
+          "rect": [
+            785,
+            "resultOffset + 526",
+            1770,
+            "resultOffset + 648"
+          ]
+        },
+        {
+          "strategy": "linear-blend",
+          "rect": [
+            785,
+            "resultOffset + 722",
+            1770,
+            "resultOffset + 844"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "endcard",
+      "_note": "Small centred title on a near-flat field. linear-blend is enough and costs nothing.",
+      "start": 161,
+      "end": 180,
+      "clear": [
+        {
+          "strategy": "linear-blend",
+          "rect": [
+            825,
+            490,
+            1110,
+            574
+          ]
+        }
+      ]
+    }
+  ]
+}

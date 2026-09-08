@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Adaptation</title>
+<style>
+  /* Declared once and never scaled: the canvas backing store, the CSS box and
+     the composition's data-width/height must all agree, or plates resample and
+     the text softens. */
+  /* A fresh copy renders on system faces, so the pipeline works before you have
+     sourced a font. Swap in your own for anything you will publish: system font
+     rasterization varies by machine and undercuts reproducibility.
+
+     Uncomment, point at the real file, and change FACE in film.js to match.
+     An @font-face whose src does not resolve fails the render with an opaque
+     "NetworkError", not a missing-font message - so add the file first.
+
+  @font-face {
+    font-family: Replacement;
+    src: url('assets/Replacement-Variable.woff2');
+    font-weight: 100 900;
+  }
+  */
+  * { box-sizing: border-box }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #000 }
+  canvas { width: 1920px; height: 1080px }
+</style>
+</head>
+<body>
+<main data-composition-id="Adaptation"
+      data-start="0"
+      data-duration="15"
+      data-width="1920"
+      data-height="1080"
+      data-fps="24"
+      data-no-timeline>
+  <!-- One clip, one canvas. film.js owns every pixel inside it, so there is no
+       DOM timeline to keep in sync with the draw loop. -->
+  <canvas id="film" width="1920" height="1080"
+          class="clip" data-start="0" data-duration="15" data-track-index="0"></canvas>
+
+  <!-- Media playback belongs to the framework. Declare the audio as a clip;
+       never call play() on it. Duration is the real stream duration, which
+       often outruns the visual loop by a fraction of a second. -->
+  <audio id="soundtrack" src="assets/reference.m4a"
+         class="clip" data-start="0" data-duration="15.061333" data-track-index="1"
+         preload="auto"></audio>
+</main>
+<script src="assets/tracks.js"></script>
+<script src="film.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "_note": "roto config for the README's own demo reference video.",
+  "source": "reference/original.mp4",
+  "frames": 72,
+  "output": "assets/plates",
+  "tracksOutput": "assets/tracks.js",
+  "bands": [
+    {
+      "name": "title",
+      "_note": "Headline and subhead sitting on a curved two-bloom gradient. linear-blend leaves a visible band across the curvature here, so cubic-hermite is the only strategy that holds.",
+      "start": 0,
+      "end": 30,
+      "clear": [
+        {"strategy": "cubic-hermite", "rect": [340, 238, 940, 412], "reach": 30}
+      ]
+    },
+    {
+      "name": "panel",
+      "_note": "Panel slides in from the right while scaling. No stable edge to lock onto, but the label text itself thresholds cleanly, so track its bounds and hang the clear rect off them. The y window stops short of the button and the cursor path, both of which must survive.",
+      "start": 30,
+      "end": 72,
+      "track": [
+        {"name": "label", "type": "bbox", "rect": [200, 340, 1150, 392], "limit": 120}
+      ],
+      "clear": [
+        {"strategy": "linear-blend",
+         "rect": ["label[0] - 14", "label[1] - 12", "label[2] + 14", "label[3] + 12"],
+         "requires": "label"}
+      ]
+    }
+  ]
+}

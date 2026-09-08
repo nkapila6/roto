@@ -1,0 +1,14 @@
+{
+  "_note": "Phase 5 config, read by scripts/render.mjs. Copy to the project root as adapt.json. `frames` asserts the rendered frame count; omit it and render.mjs falls back to `duration` * fps. `audio` and `audioDuration` are written by scripts/soundtrack.mjs - do not hand-edit them. `compare` is optional: a delivered file to check a fresh render against.",
+  "composition": ".",
+  "fps": 24,
+  "frames": 360,
+  "width": 1920,
+  "height": 1080,
+  "audio": "assets/reference.m4a",
+  "audioDuration": 15.061333,
+  "crf": 16,
+  "preset": "medium",
+  "output": "output/video.mp4",
+  "compare": "examples/delivered.mp4"
+}
